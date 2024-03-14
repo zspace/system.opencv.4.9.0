@@ -54,7 +54,6 @@ std::string
 errorString ()
 {
     LPSTR messageBuffer;
-    DWORD bufferLength;
     std::string message;
 
     //
@@ -62,21 +61,12 @@ errorString ()
     // text to be acquired from the system.
     //
 
-    if (bufferLength = FormatMessageA (FORMAT_MESSAGE_ALLOCATE_BUFFER |
-				       FORMAT_MESSAGE_IGNORE_INSERTS |
-				       FORMAT_MESSAGE_FROM_SYSTEM,
-				       0,
-				       GetLastError (),
-				       MAKELANGID (LANG_NEUTRAL,
-						   SUBLANG_DEFAULT),
-				       (LPSTR) &messageBuffer,
-				       0,
-				       NULL))
+    if (FormatMessageA (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM,
+            0, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR) &messageBuffer, 0, NULL) > 0)
     {
-	message = messageBuffer;
+        message = messageBuffer;
         LocalFree (messageBuffer);
     }
-
     return message;
 }
 
