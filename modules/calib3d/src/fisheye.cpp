@@ -599,10 +599,10 @@ void cv::fisheye::estimateNewCameraMatrixForUndistortRectify(InputArray K, Input
 
     cv::Mat points(1, 4, CV_64FC2);
     Vec2d* pptr = points.ptr<Vec2d>();
-    pptr[0] = Vec2d(w/2, 0);
-    pptr[1] = Vec2d(w, h/2);
-    pptr[2] = Vec2d(w/2, h);
-    pptr[3] = Vec2d(0, h/2);
+    pptr[0] = Vec2d(w/2, h/10);
+    pptr[1] = Vec2d(w-w/10, h/2);
+    pptr[2] = Vec2d(w/2, h-h/10);
+    pptr[3] = Vec2d(w/10, h/2);
 
     fisheye::undistortPoints(points, points, K, D, R);
     cv::Scalar center_mass = mean(points);
