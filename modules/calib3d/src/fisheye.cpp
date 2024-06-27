@@ -391,6 +391,7 @@ void cv::fisheye::undistortPoints( InputArray distorted, OutputArray undistorted
         double theta = theta_d;
 
         double scale = 0.0;
+        double z = 1.0;
 
         if (!isEps || fabs(theta_d) > criteria.epsilon)
         {
@@ -412,7 +413,8 @@ void cv::fisheye::undistortPoints( InputArray distorted, OutputArray undistorted
                 }
             }
 
-            scale = std::tan(theta) / theta_d;
+            scale = std::sin(theta) / theta_d;
+            z = std::cos(theta);
         }
         else
         {
@@ -429,8 +431,8 @@ void cv::fisheye::undistortPoints( InputArray distorted, OutputArray undistorted
             Vec2d pu = pw * scale; //undistorted point
 
             // reproject
-            Vec3d pr = RR * Vec3d(pu[0], pu[1], 1.0); // rotated point optionally multiplied by new camera matrix
-            Vec2d fi(pr[0]/pr[2], pr[1]/pr[2]);       // final
+            Vec3d pr = RR * Vec3d(pu[0], pu[1], z); // rotated point optionally multiplied by new camera matrix
+            Vec2d fi(pr[0]/pr[2], pr[1]/pr[2]);     // final
 
             if( sdepth == CV_32F )
                 dstf[i] = fi;
