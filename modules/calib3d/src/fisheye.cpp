@@ -511,32 +511,23 @@ void cv::fisheye::initUndistortRectifyMap( InputArray K, InputArray D, InputArra
         short*  m1 = (short*)m1f;
         ushort* m2 = (ushort*)m2f;
 
-        double _x = i*iR(0, 1) + iR(0, 2),
-               _y = i*iR(1, 1) + iR(1, 2),
-               _w = i*iR(2, 1) + iR(2, 2);
+        double x = i*iR(0, 1) + iR(0, 2),
+               y = i*iR(1, 1) + iR(1, 2),
+               z = i*iR(2, 1) + iR(2, 2);
 
         for( int j = 0; j < size.width; ++j)
         {
             double u, v;
-            if( _w <= 0)
-            {
-                u = (_x > 0) ? -std::numeric_limits<double>::infinity() : std::numeric_limits<double>::infinity();
-                v = (_y > 0) ? -std::numeric_limits<double>::infinity() : std::numeric_limits<double>::infinity();
-            }
-            else
-            {
-                double x = _x/_w, y = _y/_w;
+            double r2 = x*x + y*y;
+            double r = sqrt(r2);
 
-                double r = sqrt(x*x + y*y);
-                double theta = atan(r);
+            double theta_ = r < 1e-8*z ? (3*z*z - r2)/(3*z*z*z) : atan2(r, z)/r;
+            double theta2 = theta_*theta_*r2;
+            double scale = theta_ * (1. + theta2*(k[0] + theta2*(k[1] + theta2*(k[2] + theta2*k[3]))));
 
-                double theta2 = theta*theta, theta4 = theta2*theta2, theta6 = theta4*theta2, theta8 = theta4*theta4;
-                double theta_d = theta * (1 + k[0]*theta2 + k[1]*theta4 + k[2]*theta6 + k[3]*theta8);
-
-                double scale = (r == 0) ? 1.0 : theta_d / r;
-                u = f[0]*x*scale + c[0];
-                v = f[1]*y*scale + c[1];
-            }
+            // FIXME alpha parameter is not passed
+            u = f[0]*x*scale + c[0];
+            v = f[1]*y*scale + c[1];
 
             if( m1type == CV_16SC2 )
             {
@@ -552,9 +543,9 @@ void cv::fisheye::initUndistortRectifyMap( InputArray K, InputArray D, InputArra
                 m2f[j] = (float)v;
             }
 
-            _x += iR(0, 0);
-            _y += iR(1, 0);
-            _w += iR(2, 0);
+            x += iR(0, 0);
+            y += iR(1, 0);
+            z += iR(2, 0);
         }
     }
 }
