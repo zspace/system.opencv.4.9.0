@@ -107,7 +107,14 @@ struct CharucoDetector::CharucoDetectorImpl {
                     Point2f markerCorner =
                         markerCorners.getMat(markerIdx).at<Point2f>(board.getNearestMarkerCorners()[i][j]);
                     Point2f charucoCorner = charucoCorners.getMat().at<Point2f>((int)i);
-                    double dist = norm(markerCorner - charucoCorner);
+
+                    // norm() measures diagonal distance while cornerSubPix() needs distance along x/y axis
+                    // as a result norm() overestimates by up to sqrt(2) and as a result of that,
+                    // marker pixels are contributing to cornerSubPix(), resulting poor outcome
+                    double dx = abs(markerCorner.x - charucoCorner.x);
+                    double dy = abs(markerCorner.y - charucoCorner.y);
+                    double dist = max(dx, dy);
+
                     if(minDist == -1) minDist = dist; // if first distance, just assign it
                     minDist = min(dist, minDist);
                     counter++;
